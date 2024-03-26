@@ -1,0 +1,63 @@
+from collections import deque
+
+class State:
+    def __init__(self, grid, x, y):
+        self.grid = grid
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other):
+        return self.grid == other.grid and self.x == other.x and self.y == other.y
+
+    def __hash__(self):
+        return hash((tuple(map(tuple, self.grid)), self.x, self.y))
+
+def get_successors(state):
+    successors = []
+    moves = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Left, Right, Up, Down
+    for dx, dy in moves:
+        new_x, new_y = state.x + dx, state.y + dy
+        if 0 <= new_x < len(state.grid) and 0 <= new_y < len(state.grid[0]):
+            new_grid = [row[:] for row in state.grid]  # Make a copy of the grid
+            if new_grid[new_x][new_y] == 1:
+                new_grid[new_x][new_y] = 0  # Clean the cell if dirty
+            successors.append(State(new_grid, new_x, new_y))
+    return successors
+
+def bfs(initial_state):
+    queue = deque()
+    visited = set()
+    parent = {}
+    queue.append(initial_state)
+    visited.add(initial_state)
+
+    while queue:
+        current_state = queue.popleft()
+        if all(cell == 0 for row in current_state.grid for cell in row):
+            path = []
+            while current_state:
+                path.append((current_state.x, current_state.y))
+                current_state = parent.get(current_state)
+            return path[::-1]
+        for successor in get_successors(current_state):
+            if successor not in visited:
+                visited.add(successor)
+                parent[successor] = current_state
+                queue.append(successor)
+    return None
+
+def print_solution(path):
+    print("Solution found:")
+    for i, (x, y) in enumerate(path):
+        print(f"Step {i}: Clean cell at ({x}, {y})")
+
+# Example usage:
+grid = [[1, 0, 1],
+        [0, 1, 1],
+        [1, 1, 1]]
+initial_state = State(grid, 0, 0)
+solution_path = bfs(initial_state)
+if solution_path:
+    print_solution(solution_path)
+else:
+    print("No solution found.")
