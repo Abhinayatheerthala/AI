@@ -1,0 +1,82 @@
+from collections import deque
+
+class State:
+    def __init__(self, m, c, b):
+        self.missionaries = m  # Number of missionaries on the initial side
+        self.cannibals = c  # Number of cannibals on the initial side
+        self.boat = b  # Boat location (0 for initial side, 1 for opposite side)
+
+    def is_valid(self):
+        if self.missionaries < 0 or self.missionaries > 3 or \
+           self.cannibals < 0 or self.cannibals > 3:
+            return False
+        if self.missionaries < self.cannibals and self.missionaries > 0:
+            return False
+        if 3 - self.missionaries < 3 - self.cannibals and 3 - self.missionaries > 0:
+            return False
+        return True
+
+    def __eq__(self, other):
+        return self.missionaries == other.missionaries and \
+               self.cannibals == other.cannibals and \
+               self.boat == other.boat
+
+    def __hash__(self):
+        return hash((self.missionaries, self.cannibals, self.boat))
+
+def get_successors(state):
+    successors = []
+    if state.boat == 0:  # Boat is on the initial side
+        for m in range(3 + 1):
+            for c in range(3 + 1):
+                if 1 <= m + c <= 2:
+                    successor = State(state.missionaries - m, state.cannibals - c, 1)
+                    if successor.is_valid():
+                        successors.append(successor)
+    else:  # Boat is on the opposite side
+        for m in range(3 + 1):
+            for c in range(3 + 1):
+                if 1 <= m + c <= 2:
+                    successor = State(state.missionaries + m, state.cannibals + c, 0)
+                    if successor.is_valid():
+                        successors.append(successor)
+    return successors
+
+def bfs():
+    start_state = State(3, 3, 0)  # Initial state: 3 missionaries and 3 cannibals on the initial side
+    goal_state = State(0, 0, 1)   # Goal state: 3 missionaries and 3 cannibals on the opposite side
+    if start_state == goal_state:
+        return [start_state]
+
+    queue = deque()
+    visited = set()
+    parent = {}
+    queue.append(start_state)
+    visited.add(start_state)
+
+    while queue:
+        current_state = queue.popleft()
+        if current_state == goal_state:
+            path = []
+            while current_state:
+                path.append(current_state)
+                current_state = parent.get(current_state)
+            return path[::-1]
+        for successor in get_successors(current_state):
+            if successor not in visited:
+                visited.add(successor)
+                parent[successor] = current_state
+                queue.append(successor)
+    return None
+
+def print_solution(path):
+    for i, state in enumerate(path):
+        print(f"Step {i}: Missionaries={state.missionaries}, Cannibals={state.cannibals}, Boat={'Initial' if state.boat == 0 else 'Opposite'}")
+
+# Example usage:
+solution_path = bfs()
+if solution_path:
+    print("Solution found:")
+    print_solution(solution_path)
+else:
+    print("No solution found.")
