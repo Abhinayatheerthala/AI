@@ -1,0 +1,40 @@
+from collections import deque
+
+class State:
+    def __init__(self, value):
+        self.value = value
+
+def bfs(initial_state, goal_state):
+    queue = deque()
+    visited = set()
+
+    queue.append(initial_state)
+    visited.add(initial_state.value)
+
+    while queue:
+        current_state = queue.popleft()
+        if current_state.value == goal_state:
+            return current_state
+        # Generate successor states
+        successors = generate_successors(current_state)
+        for successor in successors:
+            if successor.value not in visited:
+                queue.append(successor)
+                visited.add(successor.value)
+    return None
+
+def generate_successors(state):
+    # Dummy function to generate successors
+    # In a real scenario, you would implement this based on your problem
+    # This function generates successors by adding 1 to the current value
+    return [State(state.value + 1)]
+
+# Example usage:
+initial_state = State(0)
+goal_state = 10
+result = bfs(initial_state, goal_state)
+if result:
+    print(f"Goal state {goal_state} found.")
+else:
+    print(f"Goal state {goal_state} not found.")
+
