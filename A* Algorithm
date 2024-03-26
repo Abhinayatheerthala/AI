@@ -1,0 +1,65 @@
+import heapq
+
+class Node:
+    def __init__(self, state, cost, parent=None):
+        self.state = state
+        self.cost = cost
+        self.parent = parent
+
+    def __lt__(self, other):
+        return self.cost < other.cost
+
+def astar(start, goal, neighbors, heuristic):
+    open_set = []
+    closed_set = set()
+
+    heapq.heappush(open_set, start)
+
+    while open_set:
+        current_node = heapq.heappop(open_set)
+
+        if current_node.state == goal:
+            path = []
+            while current_node:
+                path.append(current_node.state)
+                current_node = current_node.parent
+            return path[::-1]
+
+        closed_set.add(current_node.state)
+
+        for neighbor in neighbors(current_node.state):
+            if neighbor in closed_set:
+                continue
+
+            tentative_cost = current_node.cost + 1  # Assuming all edges have a cost of 1
+            neighbor_node = Node(neighbor, tentative_cost, current_node)
+
+            if neighbor_node not in open_set:
+                heapq.heappush(open_set, neighbor_node)
+            else:
+                for node in open_set:
+                    if node.state == neighbor_node.state and node.cost > neighbor_node.cost:
+                        open_set.remove(node)
+                        heapq.heapify(open_set)
+                        heapq.heappush(open_set, neighbor_node)
+
+    return None
+
+# Example usage:
+def neighbors(state):
+    # Dummy function to return neighbors of a state
+    # In a real scenario, you would implement this based on your problem
+    return [state + 1, state - 1]
+
+def heuristic(state, goal):
+    # Dummy function to calculate heuristic value
+    # In a real scenario, you would implement this based on your problem
+    return abs(goal - state)
+
+start_node = Node(0, 0)
+goal_node = 10
+path = astar(start_node, goal_node, neighbors, heuristic)
+if path:
+    print("Shortest path:", path)
+else:
+    print("No path found.")
