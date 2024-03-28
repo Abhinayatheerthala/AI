@@ -1,0 +1,31 @@
+def minimax(numbers, depth, maximizing_player):
+    if depth == 0 or len(numbers) == 0:
+        return sum(numbers) if maximizing_player else -sum(numbers)
+
+    if maximizing_player:
+        max_eval = float('-inf')
+        for i, num in enumerate(numbers):
+            eval = minimax(numbers[:i] + numbers[i+1:], depth - 1, False)
+            max_eval = max(max_eval, eval)
+        return max_eval
+    else:
+        min_eval = float('inf')
+        for i, num in enumerate(numbers):
+            eval = minimax(numbers[:i] + numbers[i+1:], depth - 1, True)
+            min_eval = min(min_eval, eval)
+        return min_eval
+
+# Sample input
+numbers = [3, 7, 2, 8, 4]
+
+# Example usage
+best_move = None
+best_eval = float('-inf')
+for i, num in enumerate(numbers):
+    eval = minimax(numbers[:i] + numbers[i+1:], 2, False)  # Depth set to 2 for example
+    if eval > best_eval:
+        best_eval = eval
+        best_move = num
+
+print("Sample input:", numbers)
+print("Best move (maximizing sum):", best_move)
